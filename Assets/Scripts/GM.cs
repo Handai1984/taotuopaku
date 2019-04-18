@@ -19,7 +19,8 @@ public class GM : MonoBehaviour
 	private int score,highscore;
 //得分
 
-//最高分
+//广告
+	public ad admob;
 
 	void Awake ()
 	{
@@ -99,5 +100,11 @@ public class GM : MonoBehaviour
 		
 		HighText.text = highscore/100 + "M";
 	}
+
+	public void Showad() {
+	
+		admob.ShowInter ();
+	}
+		
 
 }

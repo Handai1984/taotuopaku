@@ -57,7 +57,8 @@ public class PlayerController : MonoBehaviour {
 			GM.instance.bannerUI.SetActive (true);
 			GM.instance.ShowCurrentScore ();
 			GM.instance.ShowHighScore ();
-			GoogleGM.googlegm.GADInterstitalShow ();
+			GM.instance.Showad ();
+			//GoogleGM.googlegm.GADInterstitalShow ();
 			gameObject.SetActive (false);
 		}
 	}

@@ -20,38 +20,35 @@ namespace Umeng
     public class Analytics
     {
 
-
+		static string version = "2.3";
 #if UNITY_ANDROID
 		static bool hasInit = false;
 
 #endif
 
 	
-        //iOS Android Universal API
-
-
-
         // 
         /// <summary>
         /// 开始友盟统计 默认发送策略为启动时发送
         /// </summary>
         /// <param name="appKey">友盟appKey</param>
         /// <param name="channelId">渠道名称</param>
-        public static void Start()
+        public static void StartWithAppKeyAndChannelId(string appKey, string channelId)
         {
 #if UNITY_EDITOR
-//        Debug.LogWarning("友盟统计在iOS/Android 真机上才会向友盟后台服务器发送事件 请在真机上测试");
+        //Debug.LogWarning("友盟统计在iOS/Android 真机上才会向友盟后台服务器发送事件 请在真机上测试");
 
 #elif UNITY_IPHONE
 
        
 	
-        StartWithAppKeyAndReportPolicyAndChannelId("", ReportPolicy.BATCH, "");
+        StartWithAppKeyAndReportPolicyAndChannelId(appKey, ReportPolicy.BATCH, channelId);
         
 #elif UNITY_ANDROID
 
 
-
+			_AppKey = appKey;
+			_ChannelId = channelId;
 
             UMGameAgentInit();
 
@@ -82,9 +79,7 @@ namespace Umeng
 #elif UNITY_IPHONE
         _SetLogEnabled(value);
 #elif UNITY_ANDROID
-            
-			var util = new AndroidJavaClass("com.umeng.commonsdk.UMConfigure");
-			util.CallStatic("setLogEnabled",value);
+            Agent.CallStatic("setDebugMode", value);
 #endif
         }
 
@@ -144,164 +139,13 @@ namespace Umeng
 #endif
 
         }
-        /// <summary>
-        /// 时长统计事件
-        /// 与EventEnd要配对使用
-        /// </summary>
-        /// <param name="eventId">友盟后台设定的事件Id</param>
-        public static void EventBegin(string eventId)
-        {
-#if UNITY_EDITOR
-        //Debug.Log("BeginEvent");  
-#elif UNITY_IPHONE
-        _BeginEventWithLabel(eventId, "");
-#elif UNITY_ANDROID
-          Agent.CallStatic("onEventBegin", Context, eventId);
-  
-#endif
-        }
-
-        /// <summary>
-        /// 时长统计事件
-        /// 与EventBegin要配对使用
-        /// </summary>
-        /// <param name="eventId">友盟后台设定的事件</param>
-        public static void EventEnd(string eventId)
-        {
-#if UNITY_EDITOR
-        //Debug.Log("EndEvent");  
-#elif UNITY_IPHONE
-        _EndEventWithLabel(eventId, "");
-#elif UNITY_ANDROID
-            Agent.CallStatic("onEventEnd", Context, eventId);
-#endif
-        }
 
 
-        /// <summary>
-        /// 时长统计事件
-        /// 与EventEnd要配对使用
-        /// </summary>
-        /// <param name="eventId">友盟后台设定的事件Id</param>
-        /// <param name="label">分类标签</param>
-        public static void EventBegin(string eventId, string label)
-        {
-#if UNITY_EDITOR
-        //Debug.Log("BeginEvent");  
-#elif UNITY_IPHONE
-        _BeginEventWithLabel(eventId, label);
-#elif UNITY_ANDROID
-            Agent.CallStatic("onEventBegin", Context, eventId, label);
-#endif
-        }
-
-        /// <summary>
-        /// 时长统计事件
-        /// 与EventBegin要配对使用
-        /// </summary>
-        /// <param name="eventId">友盟后台设定的事件</param>
-        /// <param name="label">分类标签</param>
-        public static void EventEnd(string eventId, string label)
-        {
-#if UNITY_EDITOR
-        //Debug.Log("EndEvent");  
-#elif UNITY_IPHONE
-        _EndEventWithLabel(eventId, label);
-#elif UNITY_ANDROID
-            Agent.CallStatic("onEventEnd", Context, eventId, label);
-#endif
-        }
 
 
-        /// <summary>
-        /// 时长统计事件
-        /// 与EventEndWithPrimarykey要配对使用 并传递相同的eventId 和 primaryKey
-        /// 
-        /// </summary>
-        /// <param name="eventId">友盟后台设定的事件</param>
-        /// <param name="primaryKey">主键</param>
-        /// <param name="attributes"></param>
-        /// 
-        public static void EventBeginWithPrimarykeyAndAttributes(string eventId, string primaryKey, Dictionary<string, string> attributes)
-        {
-#if UNITY_EDITOR
-            //Debug.Log("EventBeginWithPrimarykeyAndAttributes");
-#elif UNITY_IPHONE
-            _BeginEventWithPrimarykeyAndAttributes(eventId, primaryKey, DictionaryToJson(attributes));
-#elif UNITY_ANDROID
-            Agent.CallStatic("onKVEventBegin", Context, eventId, ToJavaHashMap(attributes), primaryKey);
-#endif
-        }
-
-        /// <summary>
-        /// 时长统计事件
-        /// 与EventBeginWithPrimarykeyAndAttributes要配对使用 并传递相同的eventId 和 primaryKey
-        /// </summary>
-        /// <param name="eventId">友盟后台设定的事件</param>
-        /// <param name="primaryKey">主键</param>
-        public static void EventEndWithPrimarykey(string eventId, string primaryKey)
-        {
-#if UNITY_EDITOR
-            //Debug.Log("EventEndWithPrimarykey");
-#elif UNITY_IPHONE
-            _EndEventWithPrimarykey(eventId, primaryKey);
-#elif UNITY_ANDROID
-            Agent.CallStatic("onKVEventEnd", Context, eventId, primaryKey);
-#endif
-        }
 
 
-        /// <summary>
-        /// 时长统计事件
-        /// </summary>
-        /// <param name="eventId">友盟后台设定的事件</param>
-        /// <param name="milliseconds">时长 单位是毫秒</param>
-        public static void EventDuration(string eventId, int milliseconds)
-        {
-#if UNITY_EDITOR 
-        //Debug.Log("EventDuration");  
-#elif UNITY_IPHONE
-			_EventWithDuration(eventId, milliseconds);
-#elif UNITY_ANDROID
-            Agent.CallStatic("onEventDuration", Context, eventId, (long)milliseconds);
-#endif
-        }
 
-        /// <summary>
-        /// 时长统计事件
-        /// </summary>
-        /// <param name="eventId">友盟后台设定的事件</param>
-        /// <param name="label">分类标签</param>
-        /// <param name="milliseconds">时长 单位是毫秒</param>
-        /// 
-        public static void EventDuration(string eventId, string label, int milliseconds)
-        {
-#if UNITY_EDITOR
-        //Debug.Log("EventDuration");  
-#elif UNITY_IPHONE
-        _EventWithDuration2(eventId,label,milliseconds);
-#elif UNITY_ANDROID
-            Agent.CallStatic("onEventDuration", Context, eventId, label, (long)milliseconds);
-#endif
-        }
-
-        /// <summary>
-        /// 时长统计事件
-        /// </summary>
-        /// <param name="eventId">友盟后台设定的事件</param>
-        /// <param name="attributes"> 属性中的Key-Vaule Pair不能超过10个</param>
-        /// <param name="milliseconds">时长 单位是毫秒</param>
-        /// 
-        public static void EventDuration(string eventId, Dictionary<string, string> attributes, int milliseconds)
-        {
-#if UNITY_EDITOR 
-        //Debug.Log("EventDuration");
-#elif UNITY_IPHONE
-            _EventWithAttributesAndDuration(eventId, DictionaryToJson(attributes), milliseconds);
-#elif UNITY_ANDROID
-            Agent.CallStatic("onEventDuration", Context, eventId, ToJavaHashMap(attributes), (long)milliseconds);
-#endif
-        }
 
         /// <summary>
         /// 页面时长统计,记录某个页面被打开多长时间
@@ -404,8 +248,7 @@ namespace Umeng
 			#elif UNITY_IPHONE
 			_SetEncryptEnabled(value);
 			#elif UNITY_ANDROID
-			var util = new AndroidJavaClass("com.umeng.commonsdk.UMConfigure");
-			util.CallStatic("setEncryptEnabled",value);
+			Agent.CallStatic("enableEncrypt", value);
 			#endif
 
 
@@ -424,7 +267,25 @@ namespace Umeng
 
 		}
 		
+			public static  void Event(string[] keyPath,int value,string label)
+			{
 
+
+			#if UNITY_EDITOR
+		
+			#elif UNITY_IPHONE
+				
+			var listStr = String.Join(";=umengUnity=;", keyPath);
+			_CCEvent(listStr,value,label);
+
+			#elif UNITY_ANDROID
+
+
+			var listStr = String.Join(";=umengUnity=;", keyPath);
+			var util = new AndroidJavaClass("com.umeng.analytics.UnityUtil");
+			util.CallStatic("onEventForUnity", Context, listStr,value,label);
+			#endif
+			}
 
 
 
@@ -541,7 +402,7 @@ namespace Umeng
         //Debug.LogWarning("友盟统计在iOS/Androi 真机上才会向友盟后台服务器发送事件 请在真机上测试");
 #else
 
-        _StartWithAppKeyAndReportPolicyAndChannelId(appkey, (int)policy, channelId);
+        _StartWithAppKeyAndReportPolicyAndChannelId(appkey, (int)policy, channelId,version);
         _AppKey = appkey;
         _ChannelId = channelId;
 #endif
@@ -812,10 +673,11 @@ namespace Umeng
             }
         }
 
+		
         public static void UMGameAgentInit()
         {
 			var util = new AndroidJavaClass("com.umeng.analytics.UnityUtil");
-			util.CallStatic("initUnity", Context,"","");
+			util.CallStatic("initUnity", Context,AppKey,ChannelId,version);
         }
 
         public void Dispose()
@@ -863,7 +725,7 @@ namespace Umeng
 
 
     [DllImport("__Internal")]
-    private static extern void _StartWithAppKeyAndReportPolicyAndChannelId(string appkey, int policy, string channelId);
+    private static extern void _StartWithAppKeyAndReportPolicyAndChannelId(string appkey, int policy, string channelId,string version);
 
     [DllImport("__Internal")]
     private static extern void _SetLogSendInterval(double interval);
@@ -931,6 +793,11 @@ namespace Umeng
 	[DllImport("__Internal")]
 	private static extern  void _SetEncryptEnabled(bool value);
 		
+//	[DllImport("__Internal")]
+//	private static extern void _SetLatency(int value);
+
+	[DllImport("__Internal")]
+	private static extern void _CCEvent(string keyPath,int value,string label);
 
 
 				
